@@ -1,0 +1,75 @@
+package grafrandom;
+
+import java.util.ArrayList;
+import java.util.List;
+
+public class clique {
+    public static void main(String[] args) {
+        if (args.length < 2) {
+            System.out.println("Usage: java clique <n> <k>");
+            return;
+        }
+
+        int n = Integer.parseInt(args[0]);
+        int k = Integer.parseInt(args[1]);
+        
+        boolean[][] matrix = new boolean[n][n];
+        RandomGraph.main(new String[]{String.valueOf(n), String.valueOf(k/2)});
+        
+        System.out.println("\nChecking for clique of size " + k + ".");
+        boolean cliquecheck = checker(matrix, n, k);
+        System.out.println("Clique of size " + k + "= " + (cliquecheck ? "found!:D" : "not found! D:"));
+        
+        boolean[][] complement = complementgraph(matrix, n);
+        
+        System.out.println("\nChecking for stable set of size " + k + ".");
+        boolean stablesetcheck = checker(complement, n, k);
+        System.out.println("Stable set of size " + k + "= " + (stablesetcheck ? "found!:D" : "not found! D:"));
+    }
+
+    public static boolean checker(boolean[][] graph, int n, int k) {
+        if (k <= 1) return true;
+        if (k > n) return false;
+        
+        boolean[] inClique = new boolean[n];
+        return backtrack(graph, n, k, 0, 0, inClique);
+    }
+    
+    private static boolean backtrack(boolean[][] graph, int n, int k, int start, int size, boolean[] inClique) {
+        if (size >= k) return true;
+        
+        if (start >= n) return false;
+        
+        boolean canAdd = true;
+        for (int i = 0; i < start; i++) {
+            if (inClique[i] && !graph[start][i]) {
+                canAdd = false;
+                break;
+            }
+        }
+        
+        if (canAdd) {
+            inClique[start] = true;
+            if (backtrack(graph, n, k, start + 1, size + 1, inClique)) {
+                return true;
+            }
+            inClique[start] = false;
+        }
+        
+        return backtrack(graph, n, k, start + 1, size, inClique);
+    }
+    
+    public static boolean[][] complementgraph(boolean[][] graph, int n) {
+        boolean[][] complement = new boolean[n][n];
+        
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < n; j++) {
+                if (i != j) {
+                    complement[i][j] = !graph[i][j];
+                }
+            }
+        }
+        
+        return complement;
+    }
+}
