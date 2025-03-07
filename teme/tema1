@@ -1,0 +1,114 @@
+package grafrandom;
+
+import java.util.Arrays;
+import java.util.Random;
+
+public class RandomGraph {
+    private static final Random random = new Random();
+
+    public static void main(String[] args) {
+        if (args.length < 2) {
+            System.out.println("Usage: java RandomGraph <n> <k>");
+            return;
+        }
+
+        int n = Integer.parseInt(args[0]);
+        int k = Integer.parseInt(args[1]);
+
+        if (k > n) {
+            System.out.println("Error! k cannot be larger than n!");
+            return;
+        }
+
+        long startTime = System.currentTimeMillis();
+        boolean[][] matrix = new boolean[n][n];
+        generategraph(matrix, n, k);
+        
+        int edgecount = countedges(matrix, n);
+        int maxdegree = 0;
+        int mindegree = n;
+        int[] degrees = new int[n];
+        
+        for (int i = 0; i < n; i++) {
+            degrees[i] = calculatedegree(matrix, i, n);
+            maxdegree = Math.max(maxdegree, degrees[i]);
+            mindegree = Math.min(mindegree, degrees[i]);
+        }
+        
+        long endTime = System.currentTimeMillis();
+        if (n <= 200) {
+            System.out.println("Adjacency Matrix:");
+            System.out.println(representation(matrix, n));
+        }
+        
+        System.out.println("No. of edges m= " + edgecount);
+        System.out.println("Max degree Δ(G)= " + maxdegree);
+        System.out.println("Min degree δ(G)= " + mindegree);
+        System.out.println("Sum of degrees= " + Arrays.stream(degrees).sum());
+        System.out.println("2 * m= " + (2 * edgecount));
+        System.out.println((Arrays.stream(degrees).sum() == 2 * edgecount ? "Equal!:)" : "Not equal:("));
+        
+        if (n > 200) {
+            System.out.println("Running time: " + (endTime - startTime) + " ms");
+        }
+    }
+    
+    private static void generategraph(boolean[][] matrix, int n, int k) {
+        for (int i = 0; i < k; i++) {
+            for (int j = i + 1; j < k; j++) {
+                matrix[i][j] = true;
+                matrix[j][i] = true;
+            }
+        }
+        for (int i = 0; i < n; i++) {
+            for (int j = i + 1; j < n; j++) {
+                if ((i < k && j < k) || (i >= k && i < 2*k && j >= k && j < 2*k)) {
+                    continue;
+                }
+                if (random.nextBoolean()) {
+                    matrix[i][j] = true;
+                    matrix[j][i] = true;
+                }
+            }
+        }
+    }
+    
+    private static int countedges(boolean[][] matrix, int n) {
+        int count = 0;
+        for (int i = 0; i < n; i++) {
+            for (int j = i + 1; j < n; j++) {
+                if (matrix[i][j]) {
+                    count++;
+                }
+            }
+        }
+        return count;
+    }
+    
+    private static int calculatedegree(boolean[][] matrix, int vertex, int n) {
+        int degree = 0;
+        for (int i = 0; i < n; i++) {
+            if (matrix[vertex][i]) {
+                degree++;
+            }
+        }
+        return degree;
+    }
+    
+    private static String representation(boolean[][] matrix, int n) {
+        StringBuilder builder = new StringBuilder();
+        
+        char filled = '■';
+        char empty = '□';
+        
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < n; j++) {
+                builder.append(matrix[i][j] ? filled : empty).append(' ');
+            }
+            builder.append('\n');
+        }
+        
+        return builder.toString();
+    }
+}
+
